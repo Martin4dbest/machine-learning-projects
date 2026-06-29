@@ -52,5 +52,5 @@ Matplotlib
 Scikit-learn
 ---
 👨‍💻 Author
-Martin Uzoma  
+Martin Agoha 
 Machine Learning journey 🚀
