@@ -1,79 +1,83 @@
-# ==========================================
-# Project 02 - AI Chatbot
-# AI Engineering Bootcamp
-# Author: Martin Agoha
-# ==========================================
+from flask import Flask, render_template, request, jsonify
+from chatbot import create_chat, send_message, PERSONALITIES
 
-from dotenv import load_dotenv
-import os
-from google import genai
+app = Flask(__name__)
 
-# ==========================================
-# Load Environment Variables
-# ==========================================
+# Store active chats (simple in-memory storage)
+chats = {}
 
-load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
+@app.route("/")
+def home():
+    return render_template(
+        "index.html",
+        personalities=PERSONALITIES
+    )
 
-if not api_key:
-    raise ValueError("❌ GEMINI_API_KEY not found in .env file.")
 
-# ==========================================
-# Create Gemini Client
-# ==========================================
+@app.route("/start_chat", methods=["POST"])
+def start_chat():
 
-client = genai.Client(api_key=api_key)
+    data = request.get_json()
 
-# ==========================================
-# Start Chat Session
-# ==========================================
+    name = data.get("name", "").strip()
+    personality = data.get("personality", "").strip()
+    custom_prompt = data.get("custom_prompt", "").strip()
 
-chat = client.chats.create(
-    model="gemini-2.5-flash"
-)
+    chat, personality_name = create_chat(
+        name=name,
+        personality_choice=personality,
+        custom_prompt=custom_prompt
+    )
 
-# ==========================================
-# Welcome Screen
-# ==========================================
+    chats[name] = chat
 
-name = input("👤 Please enter your name: ")
+    return jsonify({
+        "success": True,
+        "personality": personality_name
+    })
 
-print("\n" + "=" * 70)
-print("🤖 MARTIN'S AI ENGINEERING ASSISTANT")
-print("=" * 70)
-print(f"Welcome, {name}! 👋")
-print("I'm powered by Google's Gemini AI.")
-print("Ask me anything about:")
-print("• Artificial Intelligence")
-print("• Machine Learning")
-print("• Python Programming")
-print("• Software Development")
-print("• Or any topic you like!")
-print("\n💬 Type 'exit' anytime to quit.")
-print("=" * 70)
 
-# ==========================================
-# Chat Loop
-# ==========================================
+@app.route("/chat", methods=["POST"])
+def chat():
 
-while True:
+    data = request.get_json()
 
-    user_input = input(f"\n{name}: ")
+    name = data.get("name")
+    message = data.get("message")
 
-    if user_input.lower() == "exit":
-        print(f"\nGoodbye, {name}! 👋")
-        print("Thanks for using Martin's AI Engineering Assistant.")
-        break
+    if name not in chats:
+        return jsonify({
+            "success": False,
+            "reply": "Chat session not found."
+        })
 
-    try:
+    result = send_message(
+        chats[name],
+        message
+    )
 
-        response = chat.send_message(user_input)
+    return jsonify(result)
 
-        print("\n🤖 Gemini:")
-        print(response.text)
 
-    except Exception as e:
+@app.route("/reset", methods=["POST"])
+def reset():
 
-        print("\n❌ An error occurred.")
-        print(e)
+    data = request.get_json()
+
+    name = data.get("name")
+
+    if name in chats:
+        del chats[name]
+
+    return jsonify({
+        "success": True
+    })
+
+
+if __name__ == "__main__":
+    app.run(
+        debug=True,
+        host="0.0.0.0",
+        port=5000
+    )

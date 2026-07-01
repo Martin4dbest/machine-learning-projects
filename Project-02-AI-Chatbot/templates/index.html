@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MartAI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= Sidebar ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🤖 <span>MartAI</span>
+        </div>
+
+        <button class="new-chat" id="startBtn">
+            <i class="fa-solid fa-plus"></i>
+            Start New Chat
+        </button>
+
+        <div class="settings">
+
+            <label>Your Name</label>
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter your name"
+            >
+
+            <label>AI Personality</label>
+
+            <select id="personality">
+
+                {% for key, value in personalities.items() %}
+                    <option value="{{ key }}">
+                        {{ value[0] }}
+                    </option>
+                {% endfor %}
+
+                <option value="26">
+                    🎯 Custom Personality
+                </option>
+
+            </select>
+
+            <textarea
+                id="customPrompt"
+                placeholder="Describe your custom AI..."
+                style="display:none;"
+            ></textarea>
+
+        </div>
+
+        <div class="footer">
+
+            <small>Powered by Gemini 2.5 Flash</small>
+
+        </div>
+
+    </aside>
+
+    <!-- ================= Chat ================= -->
+
+    <main class="chat">
+
+        <div class="chat-header">
+
+            <h2>MartAI</h2>
+
+            <span id="status">
+                Ready
+            </span>
+
+        </div>
+
+        <div id="chatBox" class="chat-box">
+
+            <div class="welcome">
+
+                <h1>👋 Welcome to MartAI</h1>
+
+                <p>
+                    Choose a personality on the left and start chatting.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="chat-input">
+
+            <input
+                type="text"
+                id="message"
+                placeholder="Message MartAI..."
+            >
+
+            <button id="sendBtn">
+
+                <i class="fa-solid fa-paper-plane"></i>
+
+            </button>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>
